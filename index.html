@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DRUGOD — Level Designer & Programmer</title>
+  <meta name="description" content="Drugod — Level designer and programmer. Creator of Call of the Void, Voidwalker, BlooM and the official Bethesda QDoom add-on. Retro FPS modder since the 90s.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow+Condensed:wght@300;400;600;700;900&family=Barlow:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black: #080808;
+      --dark: #0d0d0d;
+      --panel: #111111;
+      --border: #1e1e1e;
+      --dim: #2a2a2a;
+      --muted: #444;
+      --text: #b8b8b0;
+      --light: #d4d4cc;
+      --white: #e8e8e0;
+      --accent: #c8522a;
+      --accent2: #e8832a;
+      --green: #4a7a3a;
+      --greenlight: #6aaa4a;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--black);
+      color: var(--text);
+      font-family: 'Barlow', sans-serif;
+      font-weight: 300;
+      font-size: 16px;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* Scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.08) 2px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    /* Noise texture overlay */
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.4;
+    }
+
+    /* ─── HEADER ─── */
+    header {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 60px 60px;
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+
+    .header-bg {
+      position: absolute;
+      inset: 0;
+      background: 
+        radial-gradient(ellipse 80% 60% at 70% 40%, rgba(200, 82, 42, 0.06) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 50% at 20% 80%, rgba(232, 131, 42, 0.04) 0%, transparent 50%),
+        linear-gradient(180deg, #060606 0%, #0a0a0a 100%);
+    }
+
+    .header-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(rgba(200,82,42,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(200,82,42,0.04) 1px, transparent 1px);
+      background-size: 80px 80px;
+      mask-image: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.3) 30%, rgba(0,0,0,0.3) 70%, transparent 100%);
+    }
+
+    .nav {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      padding: 28px 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      color: var(--accent);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--accent); }
+
+    .header-content {
+      position: relative;
+      z-index: 2;
+      max-width: 900px;
+    }
+
+    .header-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-tag::before {
+      content: '';
+      width: 24px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: clamp(72px, 12vw, 140px);
+      line-height: 0.9;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      text-transform: uppercase;
+      margin-bottom: 32px;
+    }
+
+    h1 span {
+      color: var(--accent);
+      display: inline;
+    }
+
+    .header-desc {
+      font-size: 16px;
+      color: var(--text);
+      max-width: 520px;
+      line-height: 1.7;
+      margin-bottom: 48px;
+      font-weight: 300;
+    }
+
+    .header-cta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-decoration: none;
+      padding: 14px 28px;
+      border: 1px solid;
+      transition: all 0.2s;
+      display: inline-block;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--black);
+    }
+
+    .btn-primary:hover {
+      background: var(--accent2);
+      border-color: var(--accent2);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border-color: var(--dim);
+      color: var(--muted);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .header-stats {
+      position: absolute;
+      right: 60px;
+      bottom: 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      text-align: right;
+      z-index: 2;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-num {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 42px;
+      font-weight: 700;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .stat-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    /* ─── SECTIONS ─── */
+    section {
+      padding: 100px 60px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--accent);
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      margin-bottom: 48px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .section-tag::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      max-width: 120px;
+    }
+
+    h2 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: clamp(36px, 5vw, 56px);
+      color: var(--white);
+      text-transform: uppercase;
+      letter-spacing: -0.01em;
+      line-height: 1;
+      margin-bottom: 24px;
+    }
+
+    h3 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 600;
+      font-size: 22px;
+      color: var(--light);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ─── ABOUT ─── */
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: start;
+      max-width: 1100px;
+    }
+
+    .about-text p {
+      margin-bottom: 20px;
+      color: var(--text);
+      font-size: 15px;
+    }
+
+    .about-text p:first-child {
+      font-size: 18px;
+      color: var(--light);
+      font-weight: 400;
+    }
+
+    .about-sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .skill-group {
+      border-left: 2px solid var(--accent);
+      padding-left: 20px;
+    }
+
+    .skill-group-title {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--accent);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .skill-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--muted);
+      border: 1px solid var(--dim);
+      padding: 4px 10px;
+      letter-spacing: 0.1em;
+      transition: all 0.2s;
+    }
+
+    .tag:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* ─── PROJECTS ─── */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2px;
+      max-width: 1200px;
+    }
+
+    .project-card {
+      background: var(--panel);
+      padding: 40px;
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.3s;
+      text-decoration: none;
+      display: block;
+    }
+
+    .project-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--accent);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s;
+    }
+
+    .project-card:hover { border-color: var(--dim); }
+    .project-card:hover::before { transform: scaleX(1); }
+
+    .project-card.featured {
+      grid-column: span 2;
+      background: linear-gradient(135deg, #111 0%, #0d0d0d 100%);
+    }
+
+    .project-status {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .status-dot.released { background: var(--greenlight); box-shadow: 0 0 6px var(--greenlight); }
+    .status-dot.wip { background: var(--accent2); box-shadow: 0 0 6px var(--accent2); }
+    .status-dot.upcoming { background: var(--muted); }
+
+    .status-text.released { color: var(--greenlight); }
+    .status-text.wip { color: var(--accent2); }
+    .status-text.upcoming { color: var(--muted); }
+
+    .project-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 28px;
+      color: var(--white);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+    }
+
+    .project-engine {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .project-desc {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 24px;
+    }
+
+    .project-links {
+      display: flex;
+      gap: 12px;
+    }
+
+    .project-link {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: color 0.2s;
+    }
+
+    .project-link:hover { color: var(--accent2); }
+
+    .project-link::after {
+      content: '→';
+      font-size: 12px;
+    }
+
+    .award-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(200,82,42,0.1);
+      border: 1px solid rgba(200,82,42,0.3);
+      padding: 6px 14px;
+      margin-bottom: 20px;
+    }
+
+    .award-badge span {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    /* ─── ARTICLES ─── */
+    .articles-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      max-width: 860px;
+    }
+
+    .article-item {
+      display: grid;
+      grid-template-columns: 80px 1fr auto;
+      gap: 32px;
+      align-items: center;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .article-item:hover .article-title { color: var(--accent); }
+
+    .article-num {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 11px;
+      color: var(--dim);
+      letter-spacing: 0.1em;
+    }
+
+    .article-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--light);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      transition: color 0.2s;
+      margin-bottom: 4px;
+    }
+
+    .article-meta {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+    }
+
+    .article-arrow {
+      font-size: 18px;
+      color: var(--dim);
+      transition: color 0.2s, transform 0.2s;
+    }
+
+    .article-item:hover .article-arrow {
+      color: var(--accent);
+      transform: translateX(4px);
+    }
+
+    /* ─── CONTACT ─── */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      max-width: 1000px;
+    }
+
+    .contact-intro {
+      font-size: 18px;
+      color: var(--light);
+      font-weight: 400;
+      margin-bottom: 20px;
+    }
+
+    .contact-text {
+      font-size: 14px;
+      color: var(--text);
+      margin-bottom: 40px;
+    }
+
+    .contact-links {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .contact-link {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      text-decoration: none;
+      padding: 16px 20px;
+      border: 1px solid var(--border);
+      transition: all 0.2s;
+    }
+
+    .contact-link:hover {
+      border-color: var(--accent);
+      background: rgba(200,82,42,0.04);
+    }
+
+    .contact-link-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--muted);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .contact-link-value {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 16px;
+      color: var(--light);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .contact-link-icon {
+      margin-left: auto;
+      color: var(--dim);
+      font-size: 18px;
+      transition: color 0.2s;
+    }
+
+    .contact-link:hover .contact-link-icon { color: var(--accent); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      padding: 32px 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer-logo {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      color: var(--dim);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .footer-copy {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10px;
+      color: var(--dim);
+      letter-spacing: 0.1em;
+    }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header-tag { animation: fadeUp 0.6s ease 0.1s both; }
+    h1 { animation: fadeUp 0.6s ease 0.2s both; }
+    .header-desc { animation: fadeUp 0.6s ease 0.3s both; }
+    .header-cta { animation: fadeUp 0.6s ease 0.4s both; }
+    .header-stats { animation: fadeUp 0.6s ease 0.5s both; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 900px) {
+      header, section { padding: 60px 30px; }
+      .nav { padding: 24px 30px; }
+      .about-grid, .contact-grid { grid-template-columns: 1fr; gap: 48px; }
+      .project-card.featured { grid-column: span 1; }
+      .header-stats { display: none; }
+      footer { padding: 24px 30px; flex-direction: column; gap: 12px; }
+      .nav-links { display: none; }
+      .article-item { grid-template-columns: 1fr auto; }
+      .article-num { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-bg"></div>
+    <div class="header-grid"></div>
+
+    <nav class="nav">
+      <div class="nav-logo">DRUGOD.GITHUB.IO</div>
+      <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#projects">Projects</a></li>
+        <li><a href="#press">Press</a></li>
+        <li><a href="#articles">Articles</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+
+    <div class="header-content">
+      <div class="header-tag">Level Designer & Programmer — Retro FPS</div>
+      <h1>DRUG<span>OD</span></h1>
+      <p class="header-desc">
+        Building retro FPS worlds since the 90s. Creator of Call of the Void, BlooM, and the official Bethesda QDoom add-on. 
+        Level designer, QuakeC/C++ programmer. Lead of Rest in Pixels & Bloom Team.
+      </p>
+      <div class="header-cta">
+        <a href="#projects" class="btn btn-primary">View Projects</a>
+        <a href="https://www.moddb.com/members/drugod" target="_blank" class="btn btn-secondary">ModDB Profile</a>
+      </div>
+    </div>
+
+    <div class="header-stats">
+      <div class="stat-item">
+        <span class="stat-num">5th</span>
+        <span class="stat-label">ModDB Mod of the Year 2025</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">4×</span>
+        <span class="stat-label">ModDB Awards won</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-num">30+</span>
+        <span class="stat-label">Years mapping</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ABOUT -->
+  <section id="about">
+    <div class="section-tag">// about</div>
+    <div class="about-grid">
+      <div class="about-text">
+        <h2>Architect<br>of Dark Spaces</h2>
+        <p>
+          I started programming at 11 on an Amstrad — BASIC, cassette tapes, 20-minute load times. I discovered Doom at a C programming course and got hold of a map editor on a pirated university CD. That was the beginning.
+        </p>
+        <p>
+          BlooM took six years. The idea came from a single conversation: <em>what would happen if you put Blood monsters into Doom?</em> That question turned into a full crossover mod, two ModDB awards, coverage in Rock Paper Shotgun, and a public endorsement from Jace Hall, founder of Monolith Productions. Then Bethesda called.
+        </p>
+        <p>
+          I lead <strong style="color: var(--light)">Rest in Pixels</strong> and <strong style="color: var(--light)">Bloom Team</strong> — two independent development teams building retro FPS games and mods. By day I work as a programmer and teach mathematics and computer science. Everything I know about game development is self-taught — from community mods, from studying id Software's source releases, and from two decades of dissecting what makes a Souls game feel like a place rather than a set of corridors.
+        </p>
+        <p>
+          My approach to level design is rooted in logic first, aesthetics second. A map that looks incredible but loses the player has failed. Every path needs internal reason. Every space needs to be readable. Beauty without structure is just confusion.
+        </p>
+        <p style="color: var(--muted); font-size: 13px;">
+          Based in Gandia, Valencia, Spain.
+        </p>
+      </div>
+      <div class="about-sidebar">
+        <div class="skill-group">
+          <div class="skill-group-title">// Game Engines</div>
+          <div class="skill-tags">
+            <span class="tag">Darkplaces</span>
+            <span class="tag">GZDoom</span>
+            <span class="tag">FTE Quake</span>
+            <span class="tag">Q2 Remastered</span>
+          </div>
+        </div>
+        <div class="skill-group">
+          <div class="skill-group-title">// Languages & Tools</div>
+          <div class="skill-tags">
+            <span class="tag">QuakeC</span>
+            <span class="tag">C++</span>
+            <span class="tag">ZScript</span>
+            <span class="tag">ACS</span>
+            <span class="tag">DECORATE</span>
+            <span class="tag">NetRadiant</span>
+          </div>
+        </div>
+        <div class="skill-group">
+          <div class="skill-group-title">// Disciplines</div>
+          <div class="skill-tags">
+            <span class="tag">Level Design</span>
+            <span class="tag">Game Programming</span>
+            <span class="tag">Mod Development</span>
+            <span class="tag">Team Direction</span>
+          </div>
+        </div>
+        <div class="skill-group">
+          <div class="skill-group-title">// Influences</div>
+          <div class="skill-tags">
+            <span class="tag">Dark Souls</span>
+            <span class="tag">Bloodborne</span>
+            <span class="tag">Doom</span>
+            <span class="tag">Quake</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <div class="section-tag">// projects</div>
+    <h2 style="margin-bottom: 48px;">Released &<br>In Development</h2>
+
+    <div class="projects-grid">
+
+      <!-- Call of the Void - Featured -->
+      <div class="project-card featured">
+        <div class="project-status">
+          <span class="status-dot released"></span>
+          <span class="status-text released">Released — v2.0</span>
+        </div>
+        <div class="award-badge">
+          <span>⬛ ModDB Players Choice 2025 — 5th Place</span>
+        </div>
+        <div class="project-title">Call of the Void</div>
+        <div class="project-engine">Quake 2 Remastered · C++ · NetRadiant</div>
+        <p class="project-desc">
+          Full episode expansion for Quake 2 Remastered. Built on top of Decino's Quake Infighter mod as a technical foundation. A Quake 1/2 crossover where both universes converge into one campaign — new monsters, maps, and weapons built from scratch over two years. Covered by PC Gamer on launch. Recognized by Kevin Cloud, co-founder of id Software, who played it in full and praised the level design specifically. 5th place in ModDB Players' Choice 2025, competing against mods from Half-Life, C&C, and Heroes of Might and Magic.
+        </p>
+        <div class="project-links">
+          <a href="https://www.moddb.com/mods/quake-ii-call-of-the-void" target="_blank" class="project-link">ModDB</a>
+          <a href="https://www.gog.com/en/game/call_of_the_void" target="_blank" class="project-link">GOG</a>
+          <a href="https://github.com/Drugod" target="_blank" class="project-link">Source Code</a>
+        </div>
+      </div>
+
+      <!-- BlooM -->
+      <div class="project-card">
+        <div class="project-status">
+          <span class="status-dot released"></span>
+          <span class="status-text released">Released — Oct 31, 2021</span>
+        </div>
+        <div class="award-badge">
+          <span>⬛ ModDB Best Crossover Mod 2019 · Best Upcoming Mod 2019</span>
+        </div>
+        <div class="project-title">BlooM</div>
+        <div class="project-engine">GZDoom · ZScript · DECORATE</div>
+        <p class="project-desc">
+          Full conversion mod combining Doom II and Blood. Conceived and built from scratch starting in 2016. Praised by Jace Hall (founder of Monolith Productions, creators of Blood), covered by Rock Paper Shotgun, PCGamesN, and GmanLives. Listed on Wikipedia in the Doom franchise article alongside Brutal Doom and MyHouse.wad.
+        </p>
+        <div class="project-links">
+          <a href="https://www.moddb.com/mods/bloom-doomblood-crossover" target="_blank" class="project-link">ModDB</a>
+          <a href="https://en.wikipedia.org/wiki/Bloom_(mod)" target="_blank" class="project-link">Wikipedia</a>
+          <a href="https://github.com/Drugod/BloomProject" target="_blank" class="project-link">Source</a>
+        </div>
+      </div>
+
+      <!-- QDoom -->
+      <div class="project-card">
+        <div class="project-status">
+          <span class="status-dot released"></span>
+          <span class="status-text released">Released — Dec 11, 2023</span>
+        </div>
+        <div class="award-badge">
+          <span>⬛ Official Bethesda Add-on · 30th Anniversary of Doom</span>
+        </div>
+        <div class="project-title">QDoom</div>
+        <div class="project-engine">Quake Engine · QuakeC</div>
+        <p class="project-desc">
+          Official add-on for Quake released by Bethesda for the 30th anniversary of Doom. Recreates Knee-Deep in the Dead inside the Quake engine with enemies from both franchises. Bethesda published an exclusive interview with Drugod on their Slayers Club channel alongside John Romero's Sigil II — the two headline releases of the anniversary event.
+        </p>
+        <div class="project-links">
+          <a href="https://slayersclub.bethesda.net/es-ES/article/new-add-on-qdoom-quake" target="_blank" class="project-link">Bethesda Interview</a>
+        </div>
+      </div>
+
+      <!-- Profaned -->
+      <div class="project-card">
+        <div class="project-status">
+          <span class="status-dot wip"></span>
+          <span class="status-text wip">In Development</span>
+        </div>
+        <div class="project-title">Profaned</div>
+        <div class="project-engine">Darkplaces Engine · Bloom Team × Rising Fire Games</div>
+        <p class="project-desc">
+          Egyptian-themed old-school FPS in the vein of Quake, Blood, and Doom. A WWII soldier crash-lands in the Egyptian desert and must fight through ancient temples, crypts, and pyramids crawling with nightmarish creatures. Co-developed with Emmanuel Frechou (Rising Fire Games) — developer of <em>Hands of Necromancy</em> (Fulqrum Publishing, 87% Very Positive on Steam) — whose team also includes ex-3D Realms developers from Wrath: Aeon of Ruin and Phantom Fury. Development started February 2025.
+        </p>
+      </div>
+
+      <!-- Voidwalker -->
+      <div class="project-card">
+        <div class="project-status">
+          <span class="status-dot wip"></span>
+          <span class="status-text wip">In Development — Wishlist Now</span>
+        </div>
+        <div class="project-title">Voidwalker</div>
+        <div class="project-engine">Quake Engine (Darkplaces) · Bloom Team</div>
+        <p class="project-desc">
+          Single-player retro FPS set in a brutalist, non-Euclidean world infested with Lovecraftian creatures. Classic Quake movement — bunny-hopping, wall-running — fused with cosmic horror and post-apocalyptic atmosphere. Three-level demo in final polish.
+        </p>
+        <div class="project-links">
+          <a href="https://store.steampowered.com/app/2709070/Voidwalker/" target="_blank" class="project-link">Steam</a>
+        </div>
+      </div>
+
+      <!-- Black Rain -->
+      <div class="project-card">
+        <div class="project-status">
+          <span class="status-dot upcoming"></span>
+          <span class="status-text upcoming">On Hold</span>
+        </div>
+        <div class="project-title">Black Rain</div>
+        <div class="project-engine">Adventure Game Studio · Bloom Team</div>
+        <p class="project-desc">
+          Retro-style graphic adventure game developed under Bloom Team. Currently on hold.
+        </p>
+      </div>
+
+
+
+    </div>
+  </section>
+
+  <!-- ARTICLES -->
+  <section id="articles">
+    <div class="section-tag">// writing</div>
+    <h2 style="margin-bottom: 48px;">Dev Notes &<br>Design Writing</h2>
+
+    <div class="articles-list">
+
+      <a href="https://www.moddb.com/members/drugod" target="_blank" class="article-item">
+        <span class="article-num">01</span>
+        <div>
+          <div class="article-title">How a Three-Person Team Built a Quake 2 Mod That Caught id Software's Attention</div>
+          <div class="article-meta">ModDB · 2025 · Brand & Development</div>
+        </div>
+        <span class="article-arrow">→</span>
+      </a>
+
+      <a href="https://www.moddb.com/members/drugod" target="_blank" class="article-item">
+        <span class="article-num">02</span>
+        <div>
+          <div class="article-title">Why Call of the Void Only Works on Quake 2 Remastered</div>
+          <div class="article-meta">dev.to · 2025 · Technical · C++ · QuakeC</div>
+        </div>
+        <span class="article-arrow">→</span>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- RECOGNITION -->
+  <section id="press">
+    <div class="section-tag">// press & recognition</div>
+    <h2 style="margin-bottom: 48px;">Media &<br>Industry Notes</h2>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 2px; max-width: 1100px;">
+
+      <div style="background: var(--panel); border: 1px solid var(--border); padding: 32px; grid-column: span 2;">
+        <div style="font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 12px;">Bethesda Softworks — Slayers Club · Dec 2023</div>
+        <div style="font-size: 14px; color: var(--text); line-height: 1.6;">Exclusive interview on Bethesda's official channel for the 30th anniversary of Doom. QDoom was one of two headline releases of the event — alongside John Romero's Sigil II. Bethesda introduced Drugod as "a new addition to our list of add-on creators." <a href="https://slayersclub.bethesda.net/es-ES/article/new-add-on-qdoom-quake" target="_blank" style="color: var(--accent); text-decoration: none;">Read the interview →</a></div>
+      </div>
+
+      <div style="background: var(--panel); border: 1px solid var(--border); padding: 32px;">
+        <div style="font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 12px;">Rock Paper Shotgun</div>
+        <div style="font-size: 14px; color: var(--text); line-height: 1.6;">Named BlooM one of the best Doom mods of 2019. Called it "an extremely cool concept" and "a real treat, visually and aurally."</div>
+      </div>
+
+      <div style="background: var(--panel); border: 1px solid var(--border); padding: 32px;">
+        <div style="font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 12px;">PC Gamer</div>
+        <div style="font-size: 14px; color: var(--text); line-height: 1.6;">Covered Call of the Void at launch in September 2025, highlighting the hybrid monster design and Quake 1/2 crossover concept.</div>
+      </div>
+
+      <div style="background: var(--panel); border: 1px solid var(--border); padding: 32px;">
+        <div style="font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 12px;">GmanLives</div>
+        <div style="font-size: 14px; color: var(--text); line-height: 1.6;">Reviewed BlooM and described it as "one of the best Doom mods ever made", praising level design, visuals, and atmosphere.</div>
+      </div>
+
+      <div style="background: var(--panel); border: 1px solid var(--border); padding: 32px;">
+        <div style="font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 12px;">Jace Hall — Monolith Productions</div>
+        <div style="font-size: 14px; color: var(--text); line-height: 1.6;">Founder and CEO of Monolith Productions (creators of Blood) publicly praised BlooM on X, calling it "awesome."</div>
+      </div>
+
+      <div style="background: var(--panel); border: 1px solid var(--border); padding: 32px;">
+        <div style="font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 12px;">Kevin Cloud & Mike Rubits — id Software</div>
+        <div style="font-size: 14px; color: var(--text); line-height: 1.6;">Following QDoom's release, id Software and Bethesda named Drugod an honorary member of the Doom community and sent a physical medal in recognition. Kevin Cloud also played Call of the Void in full, praising the level design as "a near seamless blend of Quake and Quake 2."</div>
+      </div>
+
+      <div style="background: var(--panel); border: 1px solid var(--border); padding: 32px;">
+        <div style="font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 12px;">Hobby Consolas</div>
+        <div style="font-size: 14px; color: var(--text); line-height: 1.6;">Called BlooM "the best mod to ever combine Doom and Blood" and "one of the finest mods ever made for Doom."</div>
+      </div>
+
+      <div style="background: var(--panel); border: 1px solid var(--border); padding: 32px;">
+        <div style="font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 12px;">Hands of Necromancy — Level Designer & Programmer · Fulqrum Publishing · 2022</div>
+        <div style="font-size: 14px; color: var(--text); line-height: 1.6;">Contributed 7 maps and extensive programming work to this commercial GZDoom dark fantasy FPS, published by Fulqrum Publishing (87% Very Positive on Steam, 326 reviews). Maps: Garden (03), Factory (05), The Crypt (06), Cemetery (09), Ancient Ruins (15), Volcano (18), Final Encounter (21). Also overhauled weapon feedback, screen shake, projectile lighting, and monster behavior — work beyond the original scope that earned additional compensation.</div>
+      </div>
+
+      <div style="background: var(--panel); border: 1px solid var(--border); padding: 32px;">
+        <div style="font-family: 'Share Tech Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 12px;">Rising Fire Games × Bloom Team — Profaned</div>
+        <div style="font-size: 14px; color: var(--text); line-height: 1.6;">Active collaboration with Rising Fire Games (Frechou Games), whose team includes ex-3D Realms developers from Wrath: Aeon of Ruin and Phantom Fury. Announcement post reached 34k impressions on X.</div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <div class="section-tag">// contact</div>
+    <div class="contact-grid">
+      <div>
+        <h2>Get in<br>Touch</h2>
+        <p class="contact-intro">Open to collaborations, mod projects, and level design work.</p>
+        <p class="contact-text">
+          If you're building something in the retro FPS space — whether it's a mod, an indie game, or a jam project — feel free to reach out.
+        </p>
+      </div>
+      <div class="contact-links">
+        <a href="https://www.moddb.com/members/drugod" target="_blank" class="contact-link">
+          <div>
+            <span class="contact-link-label">ModDB</span>
+            <span class="contact-link-value">moddb.com/members/drugod</span>
+          </div>
+          <span class="contact-link-icon">→</span>
+        </a>
+        <a href="https://github.com/Drugod" target="_blank" class="contact-link">
+          <div>
+            <span class="contact-link-label">GitHub</span>
+            <span class="contact-link-value">github.com/Drugod</span>
+          </div>
+          <span class="contact-link-icon">→</span>
+        </a>
+        <a href="https://www.gog.com/en/game/call_of_the_void" target="_blank" class="contact-link">
+          <div>
+            <span class="contact-link-label">Call of the Void on GOG</span>
+            <span class="contact-link-value">gog.com/game/call_of_the_void</span>
+          </div>
+          <span class="contact-link-icon">→</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-logo">DRUGOD — Rest in Pixels · Bloom Team</div>
+    <div class="footer-copy">Gandia, Valencia, Spain · Since the 90s</div>
+  </footer>
+
+</body>
+</html>
