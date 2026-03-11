@@ -761,7 +761,9 @@
       font-size: 11px;
       color: var(--accent);
       letter-spacing: 0.1em;
-      min-width: min(280px, 80vw);
+      width: min(280px, 80vw);
+      overflow: hidden;
+      white-space: nowrap;
     }
 
     .loader-text {
@@ -1194,7 +1196,7 @@
 
     // Center using actual visible height
     function centerLoader() {
-      loaderInner.style.top = (window.innerHeight / 2) + 'px';
+      loaderInner.style.top = Math.round(window.innerHeight * 0.52) + 'px';
     }
     centerLoader();
     window.addEventListener('resize', centerLoader);
