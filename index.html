@@ -693,7 +693,6 @@
 
     #loader-inner {
       position: absolute;
-      top: 50svh;
       left: 50%;
       transform: translate(-50%, -50%);
       display: flex;
@@ -1191,6 +1190,14 @@
     const loaderText = document.getElementById('loader-text');
     const loaderDots = document.getElementById('loader-dots');
     const loader     = document.getElementById('loader');
+    const loaderInner = document.getElementById('loader-inner');
+
+    // Center using actual visible height
+    function centerLoader() {
+      loaderInner.style.top = (window.innerHeight / 2) + 'px';
+    }
+    centerLoader();
+    window.addEventListener('resize', centerLoader);
 
     const steps = [
       'BasePortalVis',
