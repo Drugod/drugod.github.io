@@ -688,20 +688,22 @@
       top: 0; left: 0; right: 0; bottom: 0;
       background: var(--black);
       z-index: 10000;
-      transition: opacity 0.6s ease, visibility 0.6s;
-    }
-
-    #loader-inner {
-      position: absolute;
-      left: 50%;
-      transform: translate(-50%, -50%);
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       gap: 32px;
-      width: 90%;
-      max-width: 600px;
+      transition: opacity 0.6s ease, visibility 0.6s;
     }
+    #loader-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+      width: 80vw;
+      max-width: 420px;
+    }
+
     #loader.done { opacity: 0; visibility: hidden; }
 
     #loader::after {
@@ -742,7 +744,8 @@
     }
 
     .loader-bar-wrap {
-      width: min(280px, 80vw);
+      width: 100%;
+      max-width: 400px;
       height: 2px;
       background: var(--dim);
       overflow: hidden;
@@ -1192,16 +1195,6 @@
     const loaderText = document.getElementById('loader-text');
     const loaderDots = document.getElementById('loader-dots');
     const loader     = document.getElementById('loader');
-    const loaderInner = document.getElementById('loader-inner');
-
-    // Center using actual visible height
-    function centerLoader() {
-      loaderInner.style.top = Math.round(window.innerHeight * 0.18) + 'px';
-      loaderInner.style.left = '15%';
-      loaderInner.style.transform = 'translateX(-50%)';
-    }
-    centerLoader();
-    window.addEventListener('resize', centerLoader);
 
     const steps = [
       'BasePortalVis',
