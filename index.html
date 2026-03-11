@@ -1196,7 +1196,9 @@
 
     // Center using actual visible height
     function centerLoader() {
-      loaderInner.style.top = Math.round(window.innerHeight * 0.38) + 'px';
+      loaderInner.style.top = Math.round(window.innerHeight * 0.18) + 'px';
+      loaderInner.style.left = '50%';
+      loaderInner.style.transform = 'translateX(-50%)';
     }
     centerLoader();
     window.addEventListener('resize', centerLoader);
